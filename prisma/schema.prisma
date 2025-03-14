@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+}
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+model User {
+  uid       String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  profile   String
+  type      String   @default("defaultType") // Default value added
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role     @default(USER)
+
+  // Add the relation field for Feedback
+  feedbacks Feedback[] // A user can have multiple feedbacks
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id") // Foreign key referencing User
+  positive  String
+  negative  String
+  createdAt DateTime @default(now())
+
+  // Relation to User model
+  user User @relation(fields: [userId], references: [uid], onDelete: Cascade)
+}
+
+model Policy {
+  pid       String   @id @default(uuid())
+  lower     Int
+  upper     Int
+  special   Int
+  digit     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
